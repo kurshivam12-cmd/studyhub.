@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyHub – Study tools for students</title>
+<style>
+:root{--bg:#f2f5fa;--card:#fff;--ink:#1b2236;--mut:#5d6882;--line:#d9dfec;--ac:#3446c9;--onac:#fff;--ac2:#e8ebff;--ok:#18865b;--bad:#c23b3b;--warn:#b7791f;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#10141f;--card:#192031;--ink:#e8ecf6;--mut:#9aa6c0;--line:#2b3550;--ac:#8c9bff;--onac:#10141f;--ac2:#26305a;--ok:#4cc790;--bad:#ff8585;--warn:#f0b955;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+header{padding:28px 20px 8px;max-width:900px;margin:auto}
+h1{margin:0;font-size:2rem;letter-spacing:-.5px}
+header p{margin:4px 0 0;color:var(--mut)}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;gap:8px;overflow-x:auto;max-width:900px;margin:12px auto 0}
+nav button{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
+nav button.on{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+main{max-width:900px;margin:auto;padding:20px}
+section{display:none}section.on{display:block}
+h2{margin:0 0 4px;font-size:1.35rem}
+.sub{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}.row>*{flex:1 1 140px}
+.row.fit>*{flex:0 0 auto}
+.btn{background:var(--ac);color:var(--onac);border:0;border-radius:8px;padding:9px 16px;cursor:pointer;font:inherit}
+.btn.alt{background:var(--ac2);color:var(--ink)}
+.btn.ok{background:var(--ok);color:#fff}.btn.bad{background:var(--bad);color:#fff}
+.x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:1.1rem}
+.clock{font-size:4.5rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;margin:6px 0}
+.mode{text-align:center;color:var(--mut);margin-bottom:8px}
+.chart{display:flex;gap:10px;align-items:flex-end;height:120px;padding-top:8px}
+.chart div{flex:1;text-align:center;font-size:.75rem;color:var(--mut)}
+.chart b{display:block;background:var(--ac);border-radius:4px 4px 0 0;min-height:2px;margin-bottom:4px}
+.fc{min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.3rem;cursor:pointer;border:2px dashed var(--line);border-radius:10px;padding:18px;margin-bottom:10px}
+.fc.back{background:var(--ac2);border-style:solid;border-color:var(--ac)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.item{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}.item span{flex:1}
+.done{text-decoration:line-through;color:var(--mut)}
+.tag{font-size:.78rem;background:var(--ac2);border-radius:6px;padding:2px 8px}
+.opt{display:block;width:100%;text-align:left;margin-bottom:8px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;font:inherit}
+.opt.right{border-color:var(--ok);background:var(--ok);color:#fff}.opt.wrong{border-color:var(--bad);background:var(--bad);color:#fff}
+.bars{display:flex;align-items:flex-end;gap:3px;height:220px}
+.bars i{flex:1;background:var(--ac);border-radius:3px 3px 0 0}.bars i.hi{background:var(--warn)}
+.mut{color:var(--mut);font-size:.9rem}
+.empty{color:var(--mut);text-align:center;padding:14px}
+</style>
+</head>
+<body>
+<header><h1>StudyHub</h1><p>Seven study tools in one place. Your data stays saved in this browser.</p></header>
+<nav id="nav"></nav>
+<main>
+
+<section id="t-focus"><h2>Focus Timer</h2><p class="sub">Study 25 minutes, then take a 5-minute break.</p>
+<div class="card"><div class="mode" id="tmode">Focus time</div><div class="clock" id="tclock">25:00</div>
+<div class="row fit" style="justify-content:center"><button class="btn" id="tgo">Start</button><button class="btn alt" id="treset">Reset</button><button class="btn alt" id="tswitch">Switch to break</button></div></div>
+<div class="card"><b>Minutes studied, last 7 days</b><div class="chart" id="tchart"></div></div></section>
+
+<section id="t-cards"><h2>Flashcards</h2><p class="sub">Cards you forget show up more often.</p>
+<div class="card"><div class="row"><input id="fq" placeholder="Question or term"><input id="fa" placeholder="Answer"><button class="btn" id="fadd" style="flex:0 0 auto">Add card</button></div></div>
+<div class="card" id="fbox"></div></section>
+
+<section id="t-quiz"><h2>Quiz Maker</h2><p class="sub">Write your own questions, then test yourself with a 20-second timer per question.</p>
+<div class="card"><input id="qq" placeholder="Question" style="margin-bottom:8px">
+<div class="row"><input class="qo" placeholder="Option A"><input class="qo" placeholder="Option B"></div>
+<div class="row"><input class="qo" placeholder="Option C"><input class="qo" placeholder="Option D"></div>
+<div class="row fit"><select id="qc"><option value="0">Correct: A</option><option value="1">Correct: B</option><option value="2">Correct: C</option><option value="3">Correct: D</option></select><button class="btn" id="qadd">Add question</button></div></div>
+<div class="card" id="qbox"></div></section>
+
+<section id="t-syl"><h2>Syllabus Tracker</h2><p class="sub">Tick topics off and see how much is left before the exam.</p>
+<div class="card"><div class="row fit"><input id="sn" placeholder="Subject name" style="width:240px"><button class="btn" id="sadd">Add subject</button></div>
+<div class="mut" id="stotal"></div><div class="bar"><i id="sbar" style="width:0"></i></div></div><div id="sbox"></div></section>
+
+<section id="t-doubt"><h2>Doubt Board</h2><p class="sub">Post a doubt, get answers, and mark it solved.</p>
+<div class="card"><textarea id="dq" rows="2" placeholder="What is your doubt?" style="margin-bottom:8px"></textarea>
+<div class="row fit"><select id="dt"><option>C</option><option>Java</option><option>Web</option><option>Maths</option><option>Other</option></select><button class="btn" id="dadd">Post doubt</button>
+<select id="df"><option value="">All doubts</option><option value="open">Unsolved</option><option value="solved">Solved</option></select></div></div><div id="dbox"></div></section>
+
+<section id="t-sort"><h2>Algorithm Visualizer</h2><p class="sub">Watch how sorting algorithms work, step by step.</p>
+<div class="card"><div class="row fit"><select id="alg"><option value="bubble">Bubble sort</option><option value="selection">Selection sort</option><option value="insertion">Insertion sort</option><option value="quick">Quick sort</option></select>
+<button class="btn" id="srun">Start</button><button class="btn alt" id="sshuf">New array</button>
+<label class="mut" style="align-self:center">Delay <input id="spd" type="range" min="5" max="300" value="60" style="width:110px;padding:0"></label></div>
+<div class="bars" id="bars"></div><div class="mut" id="sinfo" style="margin-top:8px"></div></div></section>
+
+<section id="t-pyq"><h2>Previous Year Questions</h2><p class="sub">Save PYQs and see which topics repeat the most.</p>
+<div class="card"><textarea id="pq" rows="2" placeholder="Question" style="margin-bottom:8px"></textarea>
+<div class="row"><input id="ps" placeholder="Subject"><input id="pt" placeholder="Topic"><input id="py" type="number" placeholder="Year"><button class="btn" id="padd" style="flex:0 0 auto">Save question</button></div></div>
+<div class="card"><b>Most repeated topics</b><div id="pfreq"></div></div><div id="pbox"></div></section>
+
+</main>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={pom:{},cards:[],qz:[],syl:[],dbt:[],pyq:[]};
+try{S=Object.assign(S,JSON.parse(localStorage.getItem('studyhub')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('studyhub',JSON.stringify(S))}catch(e){}};
+const day=(o=0)=>{const d=new Date();d.setDate(d.getDate()-o);return d.toISOString().slice(0,10)};
+
+/* Tabs */
+const tabs=[['focus','Focus Timer'],['cards','Flashcards'],['quiz','Quiz'],['syl','Syllabus'],['doubt','Doubts'],['sort','Visualizer'],['pyq','PYQ']];
+$('#nav').innerHTML=tabs.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join('');
+function show(t){$$('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+t));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));try{localStorage.setItem('studyhub-tab',t)}catch(e){}}
+$('#nav').onclick=e=>{if(e.target.dataset.t)show(e.target.dataset.t)};
+
+/* Focus timer */
+const DUR={focus:1500,brk:300};let mode='focus',left=DUR.focus,tm=null;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function drawT(){$('#tclock').textContent=fmt(left);$('#tmode').textContent=mode==='focus'?'Focus time':'Break time';$('#tswitch').textContent=mode==='focus'?'Switch to break':'Switch to focus';$('#tgo').textContent=tm?'Pause':'Start';
+const days=[6,5,4,3,2,1,0].map(o=>{const k=day(o),m=Math.round((S.pom[k]||0)/60);return{k,m}}),mx=Math.max(30,...days.map(d=>d.m));
+$('#tchart').innerHTML=days.map(d=>`<div><b style="height:${d.m/mx*90}px"></b>${d.m}m<br>${d.k.slice(8)}</div>`).join('')}
+function beep(){try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=660;o.start();setTimeout(()=>{o.stop();c.close()},400)}catch(e){}}
+function stopT(){clearInterval(tm);tm=null}
+function tick(){left--;if(mode==='focus'){const k=day();S.pom[k]=(S.pom[k]||0)+1;if(left%10===0)save()}
+if(left<=0){beep();save();stopT();mode=mode==='focus'?'brk':'focus';left=DUR[mode]}drawT()}
+$('#tgo').onclick=()=>{if(tm)stopT();else tm=setInterval(tick,1000);drawT()};
+$('#treset').onclick=()=>{stopT();left=DUR[mode];drawT()};
+$('#tswitch').onclick=()=>{stopT();mode=mode==='focus'?'brk':'focus';left=DUR[mode];drawT()};
+
+/* Flashcards */
+let cur=null,flip=false;
+function pick(){if(!S.cards.length){cur=null;return}const w=S.cards.map(c=>c.w||3);let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){r-=w[i];if(r<=0){cur=i;break}}if(cur===null||cur>=S.cards.length)cur=0;flip=false}
+function drawF(){const b=$('#fbox');if(!S.cards.length){b.innerHTML='<div class="empty">No cards yet. Add your first card above.</div>';return}
+if(cur===null||cur>=S.cards.length)pick();const c=S.cards[cur];
+b.innerHTML=`<div class="fc ${flip?'back':''}" id="fcard" tabindex="0">${esc(flip?c.a:c.q)}</div><div class="mut" style="text-align:center;margin-bottom:10px">Tap the card to flip · ${S.cards.length} cards</div>
+<div class="row fit" style="justify-content:center"><button class="btn ok" data-k="1">I know this</button><button class="btn bad" data-k="0">I forgot</button><button class="btn alt" data-k="d">Delete card</button></div>`}
+$('#fbox').onclick=e=>{if(e.target.id==='fcard'){flip=!flip;drawF();return}const k=e.target.dataset.k;if(k===undefined)return;
+if(k==='d'){S.cards.splice(cur,1)}else{const c=S.cards[cur];c.w=k==='1'?Math.max(1,(c.w||3)-1):Math.min(8,(c.w||3)+2)}save();cur=null;drawF()};
+$('#fadd').onclick=()=>{const q=$('#fq').value.trim(),a=$('#fa').value.trim();if(!q||!a)return;S.cards.push({q,a,w:3});$('#fq').value=$('#fa').value='';save();cur=null;drawF()};
+
+/* Quiz */
+let run=null,qt=null;
+function drawQ(){const b=$('#qbox');
+if(run){if(run.i>=run.list.length){clearInterval(qt);b.innerHTML=`<h3>Score: ${run.score} / ${run.list.length}</h3>${run.wrong.length?'<b>Review these:</b>'+run.wrong.map(q=>`<div class="item"><span>${esc(q.q)}<br><span class="mut">Answer: ${esc(q.o[q.a])}</span></span></div>`).join(''):'<p>Perfect score!</p>'}<button class="btn" id="qend" style="margin-top:10px">Back to questions</button>`;return}
+const q=run.list[run.i];b.innerHTML=`<div class="mut">Question ${run.i+1} of ${run.list.length} · <span id="qtime">${run.t}</span>s left</div><h3>${esc(q.q)}</h3>${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}`;return}
+b.innerHTML=S.qz.length?`<div class="row fit" style="justify-content:space-between"><b>${S.qz.length} questions</b><button class="btn" id="qstart">Start quiz</button></div>`+S.qz.map((q,i)=>`<div class="item"><span>${esc(q.q)}</span><button class="x" data-del="${i}" aria-label="Delete">✕</button></div>`).join(''):'<div class="empty">Add at least one question to start a quiz.</div>'}
+function answer(i){if(run.lock)return;run.lock=true;clearInterval(qt);const q=run.list[run.i];
+$$('.opt').forEach((b,j)=>{if(j===q.a)b.classList.add('right');else if(j===i)b.classList.add('wrong')});
+if(i===q.a)run.score++;else run.wrong.push(q);setTimeout(()=>{run.i++;run.t=20;run.lock=false;drawQ();timer()},900)}
+function timer(){clearInterval(qt);if(!run||run.i>=run.list.length)return;qt=setInterval(()=>{run.t--;const e=$('#qtime');if(e)e.textContent=run.t;if(run.t<=0)answer(-1)},1000)}
+$('#qbox').onclick=e=>{const t=e.target;
+if(t.id==='qstart'){run={list:[...S.qz].sort(()=>Math.random()-.5),i:0,score:0,wrong:[],t:20,lock:false};drawQ();timer()}
+else if(t.id==='qend'){run=null;drawQ()}
+else if(t.dataset.o!==undefined)answer(+t.dataset.o);
+else if(t.dataset.del!==undefined){S.qz.splice(+t.dataset.del,1);save();drawQ()}};
+$('#qadd').onclick=()=>{const q=$('#qq').value.trim(),o=$$('.qo').map(i=>i.value.trim());if(!q||o.some(x=>!x))return alert('Fill the question and all four options.');
+S.qz.push({q,o,a:+$('#qc').value});$('#qq').value='';$$('.qo').forEach(i=>i.value='');save();drawQ()};
+
+/* Syllabus */
+function drawS(){let t=0,d=0;S.syl.forEach(s=>{t+=s.t.length;d+=s.t.filter(x=>x.d).length});
+$('#stotal').textContent=t?`${d} of ${t} topics done (${Math.round(d/t*100)}%)`:'No topics yet.';$('#sbar').style.width=(t?d/t*100:0)+'%';
+$('#sbox').innerHTML=S.syl.map((s,i)=>{const dn=s.t.filter(x=>x.d).length,p=s.t.length?Math.round(dn/s.t.length*100):0;
+return`<div class="card"><div class="item"><b style="flex:1">${esc(s.n)}</b><span class="mut" style="flex:0">${p}%</span><button class="x" data-ds="${i}" aria-label="Delete subject">✕</button></div><div class="bar" style="margin:6px 0"><i style="width:${p}%"></i></div>
+${s.t.map((x,j)=>`<label class="item"><input type="checkbox" style="width:auto" data-s="${i}" data-j="${j}" ${x.d?'checked':''}><span class="${x.d?'done':''}">${esc(x.x)}</span></label>`).join('')}
+<div class="row" style="margin:8px 0 0"><input placeholder="Add a topic" id="st${i}"><button class="btn alt" data-at="${i}" style="flex:0 0 auto">Add topic</button></div></div>`}).join('')}
+$('#sadd').onclick=()=>{const n=$('#sn').value.trim();if(!n)return;S.syl.push({n,t:[]});$('#sn').value='';save();drawS()};
+$('#sbox').onclick=e=>{const t=e.target;if(t.dataset.ds!==undefined){S.syl.splice(+t.dataset.ds,1)}
+else if(t.dataset.at!==undefined){const i=+t.dataset.at,v=$('#st'+i).value.trim();if(!v)return;S.syl[i].t.push({x:v,d:false})}else return;save();drawS()};
+$('#sbox').onchange=e=>{const t=e.target;if(t.dataset.j!==undefined){S.syl[+t.dataset.s].t[+t.dataset.j].d=t.checked;save();drawS()}};
+
+/* Doubts */
+function drawD(){const f=$('#df').value,l=S.dbt.map((d,i)=>({d,i})).filter(o=>!f||(f==='solved')===o.d.s);
+$('#dbox').innerHTML=l.length?l.map(({d,i})=>`<div class="card"><div class="row fit" style="align-items:center"><span class="tag">${esc(d.tag)}</span>${d.s?'<span class="tag" style="background:var(--ok);color:#fff">Solved</span>':''}<button class="x" data-dd="${i}" aria-label="Delete doubt" style="margin-left:auto">✕</button></div>
+<p style="margin:8px 0"><b>${esc(d.q)}</b></p>${d.a.map(a=>`<div class="item"><span>${esc(a)}</span></div>`).join('')}
+<div class="row" style="margin:8px 0 0"><input id="da${i}" placeholder="Write an answer"><button class="btn alt" data-ans="${i}" style="flex:0 0 auto">Reply</button><button class="btn alt" data-sol="${i}" style="flex:0 0 auto">${d.s?'Reopen':'Mark solved'}</button></div></div>`).join(''):'<div class="empty">No doubts here yet.</div>'}
+$('#dadd').onclick=()=>{const q=$('#dq').value.trim();if(!q)return;S.dbt.unshift({q,tag:$('#dt').value,a:[],s:false});$('#dq').value='';save();drawD()};
+$('#df').onchange=drawD;
+$('#dbox').onclick=e=>{const t=e.target;if(t.dataset.dd!==undefined)S.dbt.splice(+t.dataset.dd,1);
+else if(t.dataset.sol!==undefined){const d=S.dbt[+t.dataset.sol];d.s=!d.s}
+else if(t.dataset.ans!==undefined){const i=+t.dataset.ans,v=$('#da'+i).value.trim();if(!v)return;S.dbt[i].a.push(v)}else return;save();drawD()};
+
+/* Sorting visualizer */
+let arr=[],T=0,steps=0,busy=false;
+const sleep=()=>new Promise(r=>setTimeout(r,+$('#spd').value));
+function bars(h=[]){$('#bars').innerHTML=arr.map((v,i)=>`<i class="${h.includes(i)?'hi':''}" style="height:${v}%"></i>`).join('')}
+function newArr(){T++;busy=false;steps=0;arr=Array.from({length:24},()=>8+Math.floor(Math.random()*92));bars();$('#sinfo').textContent='Pick an algorithm and press Start.';$('#srun').textContent='Start'}
+async function st(h,my){if(my!==T)throw 0;steps++;bars(h);$('#sinfo').textContent='Steps: '+steps;await sleep()}
+const algs={
+async bubble(m){for(let i=0;i<arr.length;i++)for(let j=0;j<arr.length-i-1;j++){if(arr[j]>arr[j+1])[arr[j],arr[j+1]]=[arr[j+1],arr[j]];await st([j,j+1],m)}},
+async selection(m){for(let i=0;i<arr.length;i++){let k=i;for(let j=i+1;j<arr.length;j++){if(arr[j]<arr[k])k=j;await st([i,j,k],m)}[arr[i],arr[k]]=[arr[k],arr[i]]}},
+async insertion(m){for(let i=1;i<arr.length;i++){let j=i;while(j>0&&arr[j-1]>arr[j]){[arr[j-1],arr[j]]=[arr[j],arr[j-1]];await st([j-1,j],m);j--}await st([i],m)}},
+async quick(m){const q=async(l,r)=>{if(l>=r)return;const p=arr[r];let i=l;for(let j=l;j<r;j++){if(arr[j]<p){[arr[i],arr[j]]=[arr[j],arr[i]];i++}await st([i,j,r],m)}[arr[i],arr[r]]=[arr[r],arr[i]];await st([i],m);await q(l,i-1);await q(i+1,r)};await q(0,arr.length-1)}};
+$('#srun').onclick=async()=>{if(busy)return;busy=true;steps=0;const my=++T;$('#srun').textContent='Running…';
+try{await algs[$('#alg').value](my);bars();$('#sinfo').textContent=`Sorted in ${steps} steps.`}catch(e){}if(my===T){busy=false;$('#srun').textContent='Start'}};
+$('#sshuf').onclick=newArr;
+
+/* PYQ */
+function drawP(){const c={};S.pyq.forEach(p=>{const k=(p.sub+' – '+p.top).toLowerCase();c[k]=c[k]||{n:0,l:p.sub+' – '+p.top};c[k].n++});
+const top=Object.values(c).sort((a,b)=>b.n-a.n).slice(0,6);
+$('#pfreq').innerHTML=top.length?top.map(t=>`<div class="item"><span>${esc(t.l)}</span><b>${t.n}×</b></div>`).join(''):'<div class="empty">Topics will appear here as you save questions.</div>';
+$('#pbox').innerHTML=S.pyq.map((p,i)=>`<div class="card"><div class="row fit" style="align-items:center"><span class="tag">${esc(p.sub)}</span><span class="tag">${esc(p.top)}</span><span class="mut">${esc(p.yr)}</span><button class="x" data-dp="${i}" aria-label="Delete question" style="margin-left:auto">✕</button></div><p style="margin:8px 0 0">${esc(p.q)}</p></div>`).join('')}
+$('#padd').onclick=()=>{const q=$('#pq').value.trim(),sub=$('#ps').value.trim(),top=$('#pt').value.trim();if(!q||!sub||!top)return alert('Enter the question, subject and topic.');
+S.pyq.unshift({q,sub,top,yr:$('#py').value||'Year n/a'});$('#pq').value=$('#pt').value=$('#py').value='';save();drawP()};
+$('#pbox').onclick=e=>{if(e.target.dataset.dp!==undefined){S.pyq.splice(+e.target.dataset.dp,1);save();drawP()}};
+
+/* Start */
+drawT();drawF();drawQ();drawS();drawD();drawP();newArr();
+let first='focus';try{first=localStorage.getItem('studyhub-tab')||'focus'}catch(e){}show(tabs.some(t=>t[0]===first)?first:'focus');
+</script>
+</body>
+</html>
